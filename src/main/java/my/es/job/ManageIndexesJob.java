@@ -51,7 +51,6 @@ public class ManageIndexesJob {
     LocalDateTime now = LocalDateTime.now(Clock.systemUTC());
     LocalDateTime hourTime = now.truncatedTo(ChronoUnit.HOURS);
     int hour = hourTime.getHour();
-    boolean even = hour % 2 == 0;
     Client client = null;
     try {
       client = connect();
@@ -62,7 +61,8 @@ public class ManageIndexesJob {
       Arrays.stream(indices).filter((s) -> s.startsWith("my_")).
           mapToInt((s) -> Integer.valueOf(s.substring("my_".length()))).
           forEach((i) -> {
-            if (i < hour - 1) {
+            int diff = Math.floorMod(hour + 24 - i, 24);
+            if (diff > 1) {
               LOG.info("Removing index my_" + i);
               DeleteIndexResponse indexResponse = indicesAdminClient.delete(Requests.deleteIndexRequest("my_" + String.valueOf(i))).actionGet();
               if(indexResponse.isAcknowledged()) {
@@ -72,28 +72,29 @@ public class ManageIndexesJob {
               }
             }
           });
-      ensureIndexExists(indicesAdminClient, "my_" + String.valueOf(hour - 1), even ? ODD_INDEX_ALIAS : EVEN_INDEX_ALIAS);
-      ensureIndexExists(indicesAdminClient, "my_" + String.valueOf(hour), even ? EVEN_INDEX_ALIAS : ODD_INDEX_ALIAS);
+      ensureIndexExists(indicesAdminClient, "my_" + String.valueOf(Math.floorMod(hour - 1, 24)));
+      ensureIndexExists(indicesAdminClient, "my_" + String.valueOf(Math.floorMod(hour, 24)));
+      ensureIndexExists(indicesAdminClient, "my_" + String.valueOf(Math.floorMod(hour + 1, 24)));
     } finally {
       Optional.ofNullable(client).ifPresent(Client::close);
     }
   }
 
-  private boolean ensureIndexExists(IndicesAdminClient indicesAdminClient, String indexName, String alias) throws ExecutionException, InterruptedException {
+  private boolean ensureIndexExists(IndicesAdminClient indicesAdminClient, String indexName) throws ExecutionException, InterruptedException {
     try {
       indicesAdminClient.prepareGetIndex().setIndices(indexName).get();
       return false;
     } catch (IndexNotFoundException e) {
-      LOG.info("Adding index " + indexName + " with alias " + alias);
+      LOG.info("Adding index " + indexName);
       Settings settings = Settings.builder().
           put("number_of_shards", 1).
           put("number_of_replicas", 0).
           put("refresh_interval", "10s").
           put("index.store.type", "mmapfs").
           build();
-      CreateIndexRequest createIndexRequest = Requests.createIndexRequest(indexName).alias(new Alias(alias)).settings(settings);
+      CreateIndexRequest createIndexRequest = Requests.createIndexRequest(indexName).settings(settings);
       indicesAdminClient.create(createIndexRequest);
-      LOG.info("Added index " + indexName + " with alias " + alias);
+      LOG.info("Added index " + indexName);
       return true;
     }
   }
