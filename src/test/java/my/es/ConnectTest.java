@@ -37,6 +37,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.IntStream;
@@ -64,8 +65,14 @@ public class ConnectTest {
         new InetSocketTransportAddress(InetAddress.getByName("10.11.18.53"), 9300));
     IndicesAdminClient indicesAdminClient = client.admin().indices();
 
-    GetIndexResponse response = indicesAdminClient.getIndex(new GetIndexRequest().indices(INDEX_NAME)).get();
-//    DeleteIndexRequest tweets = Requests.deleteIndexRequest(INDEX_NAME);
+    GetIndexResponse response = indicesAdminClient.prepareGetIndex().get();
+    String[] indices = response.getIndices();
+    // delete old ones
+    Arrays.stream(indices).filter((s) -> s.startsWith("my_")).
+        mapToInt((s) -> Integer.valueOf(s.substring("my_".length()))).
+        forEachOrdered((i) -> {
+            indicesAdminClient.delete(Requests.deleteIndexRequest("my_" + String.valueOf(i))).actionGet();
+        });//    DeleteIndexRequest tweets = Requests.deleteIndexRequest(INDEX_NAME);
 //    indicesAdminClient.delete(tweets);
 //    DeleteIndexRequest tweets = Requests.deleteIndexRequest(INDEX_NAME + 2);
 //    indices.delete(tweets);

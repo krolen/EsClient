@@ -2,6 +2,7 @@ package my.es.job;
 
 import org.elasticsearch.action.admin.indices.alias.Alias;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
+import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse;
 import org.elasticsearch.action.admin.indices.get.GetIndexResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.IndicesAdminClient;
@@ -63,8 +64,12 @@ public class ManageIndexesJob {
           forEachOrdered((i) -> {
             if (i < hour - 1) {
               LOG.info("Removing index my_" + i);
-              indicesAdminClient.delete(Requests.deleteIndexRequest(String.valueOf(i)));
-              LOG.info("Removed my_" + i);
+              DeleteIndexResponse indexResponse = indicesAdminClient.delete(Requests.deleteIndexRequest("my_" + String.valueOf(i))).actionGet();
+              if(indexResponse.isAcknowledged()) {
+                LOG.info("Removed my_" + i);
+              } else {
+                LOG.error("Cannot remove index " + indexResponse.toString());
+              }
             }
           });
       ensureIndexExists(indicesAdminClient, "my_" + String.valueOf(hour - 1), even ? ODD_INDEX_ALIAS : EVEN_INDEX_ALIAS);
