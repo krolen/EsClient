@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Class-Path: elasticsearch-2.1.1.jar lucene-backward-codecs-5.3.1.jar j
+ ackson-dataformat-yaml-2.6.2.jar joda-time-2.8.2.jar lucene-highlight
+ er-5.3.1.jar lucene-sandbox-5.3.1.jar lucene-memory-5.3.1.jar hppc-0.
+ 7.1.jar snakeyaml-1.15.jar lucene-queries-5.3.1.jar commons-cli-1.3.1
+ .jar logback-core-1.1.3.jar lucene-analyzers-common-5.3.1.jar HdrHist
+ ogram-2.1.6.jar lucene-suggest-5.3.1.jar jackson-dataformat-smile-2.6
+ .2.jar lucene-grouping-5.3.1.jar spatial4j-0.4.1.jar lucene-join-5.3.
+ 1.jar slf4j-api-1.7.7.jar lucene-queryparser-5.3.1.jar t-digest-3.0.j
+ ar jsr166e-1.1.0.jar compress-lzf-1.0.2.jar logback-classic-1.1.3.jar
+  joda-convert-1.2.jar lucene-core-5.3.1.jar lucene-spatial-5.3.1.jar 
+ jackson-dataformat-cbor-2.6.2.jar guava-18.0.jar jackson-core-2.6.2.j
+ ar lucene-misc-5.3.1.jar netty-3.10.5.Final.jar lucene-spatial3d-5.3.
+ 1.jar
+Main-Class: my.es.job.ManageIndexesJob
+

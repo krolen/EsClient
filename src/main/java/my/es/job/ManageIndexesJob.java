@@ -96,10 +96,10 @@ public class ManageIndexesJob {
 
   public static void main(String[] args) throws InterruptedException, ExecutionException, UnknownHostException {
     ManageIndexesJob job = new ManageIndexesJob();
-    if(args[0] != null) {
+    if(args.length > 0) {
       job.setServerIp(args[0]);
     }
-    if(args[1] != null) {
+    if(args.length > 1) {
       job.setServerPort(Integer.parseInt(args[1]));
     }
     job.manageIndexes();

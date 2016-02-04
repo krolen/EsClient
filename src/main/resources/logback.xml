@@ -6,13 +6,13 @@
     </appender>
 
     <appender name="FILE_DEBUG" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>/logs/manageindex/debug/debug.log</file>
+        <file>./logs/debug.log</file>
         <encoder>
             <pattern>%-5p [%d] [%t][%X{requestUri} %X{taskId}] %c: %m%n%rEx</pattern>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!-- daily rollover -->
-            <fileNamePattern>logs/manageindex/debug-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <fileNamePattern>debug-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
             <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
                 <maxFileSize>100MB</maxFileSize>
             </timeBasedFileNamingAndTriggeringPolicy>
@@ -27,7 +27,6 @@
     </root>
 
     <logger name="my.twitter" level="DEBUG"/>
-
 
 
 </configuration>
