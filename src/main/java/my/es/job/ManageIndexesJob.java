@@ -55,7 +55,7 @@ public class ManageIndexesJob {
     try {
       client = connect();
       IndicesAdminClient indicesAdminClient = client.admin().indices();
-      GetIndexResponse response = indicesAdminClient.prepareGetIndex().setTypes(INDEX_TYPE).get();
+      GetIndexResponse response = indicesAdminClient.prepareGetIndex().get();
       String[] indices = response.getIndices();
       // delete old ones
       Arrays.stream(indices).filter((s) -> s.startsWith("my_")).
