@@ -61,7 +61,7 @@ public class ManageIndexesJob {
       // delete old ones
       Arrays.stream(indices).filter((s) -> s.startsWith("my_")).
           mapToInt((s) -> Integer.valueOf(s.substring("my_".length()))).
-          forEachOrdered((i) -> {
+          forEach((i) -> {
             if (i < hour - 1) {
               LOG.info("Removing index my_" + i);
               DeleteIndexResponse indexResponse = indicesAdminClient.delete(Requests.deleteIndexRequest("my_" + String.valueOf(i))).actionGet();
