@@ -1,5 +1,6 @@
 package my.es.job;
 
+import com.google.common.collect.Lists;
 import org.elasticsearch.action.admin.indices.alias.Alias;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse;
@@ -19,6 +20,7 @@ import java.net.UnknownHostException;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
@@ -58,18 +60,17 @@ public class ManageIndexesJob {
       GetIndexResponse response = indicesAdminClient.prepareGetIndex().get();
       String[] indices = response.getIndices();
       // delete old ones
+      ArrayList<Integer> excludeList = Lists.newArrayList(Math.floorMod(hour - 1, 24), Math.floorMod(hour, 24), Math.floorMod(hour + 1, 24));
       Arrays.stream(indices).filter((s) -> s.startsWith("my_")).
           mapToInt((s) -> Integer.valueOf(s.substring("my_".length()))).
+          filter((i) -> !excludeList.contains(i)).
           forEach((i) -> {
-            int diff = Math.floorMod(hour + 24 - i, 24);
-            if (diff > 1) {
-              LOG.info("Removing index my_" + i);
-              DeleteIndexResponse indexResponse = indicesAdminClient.delete(Requests.deleteIndexRequest("my_" + String.valueOf(i))).actionGet();
-              if(indexResponse.isAcknowledged()) {
-                LOG.info("Removed my_" + i);
-              } else {
-                LOG.error("Cannot remove index " + indexResponse.toString());
-              }
+            LOG.info("Removing index my_" + i);
+            DeleteIndexResponse indexResponse = indicesAdminClient.delete(Requests.deleteIndexRequest("my_" + String.valueOf(i))).actionGet();
+            if (indexResponse.isAcknowledged()) {
+              LOG.info("Removed my_" + i);
+            } else {
+              LOG.error("Cannot remove index " + indexResponse.toString());
             }
           });
       ensureIndexExists(indicesAdminClient, "my_" + String.valueOf(Math.floorMod(hour - 1, 24)));
@@ -102,10 +103,10 @@ public class ManageIndexesJob {
 
   public static void main(String[] args) throws InterruptedException, ExecutionException, UnknownHostException {
     ManageIndexesJob job = new ManageIndexesJob();
-    if(args.length > 0) {
+    if (args.length > 0) {
       job.setServerIp(args[0]);
     }
-    if(args.length > 1) {
+    if (args.length > 1) {
       job.setServerPort(Integer.parseInt(args[1]));
     }
     job.manageIndexes();
